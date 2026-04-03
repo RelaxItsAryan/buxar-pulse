@@ -54,7 +54,7 @@ export default function HeroSection() {
           className="glass-pill px-5 py-1.5 mb-6"
           style={{ border: '1px solid rgba(79,70,229,0.4)', background: 'rgba(79,70,229,0.1)', color: '#A78BFA', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase' }}
         >
-          🌊&nbsp; BUXAR, BIHAR &nbsp;·&nbsp; EST. 1539
+          
         </motion.div>
 
         {/* Title */}
@@ -62,7 +62,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-4xl md:text-6xl lg:text-7xl font-black text-center leading-tight mb-4"
+          className="text-4xl md:text-6xl lg:text-7xl font-black text-center leading-tight mb-4 mt-6"
         >
           Welcome To {' '}
           <span className="gradient-text">Buxar</span>
@@ -151,9 +151,9 @@ export default function HeroSection() {
       </div>
 
       {/* Stats Banner at bottom */}
-      <div className="relative z-10">
+      {/* <div className="relative z-10">
         <StatsBanner />
-      </div>
+      </div> */}
 
       {/* Floating AI Chatbot Button */}
       <motion.button
@@ -174,15 +174,11 @@ export default function HeroSection() {
 
       {/* Footer */}
       <footer
-        className="relative z-10 flex items-center justify-between px-6 py-4 text-xs text-muted-foreground"
+        className="relative z-10 mx-auto flex items-center justify-between px-6 py-4 text-xs text-muted-foreground"
         style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
       >
         <span>© 2025 MyBuxar. All rights reserved.</span>
-        <div className="flex gap-4">
-          {['Twitter', 'Instagram', 'GitHub'].map(s => (
-            <a key={s} className="hover:text-foreground transition-colors cursor-pointer">{s}</a>
-          ))}
-        </div>
+        
       </footer>
     </div>
   );
