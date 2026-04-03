@@ -271,3 +271,53 @@
     animation: gentleBounce 2s ease-in-out infinite;
   }
 }
+
+/* Leaflet Map Custom Styles */
+@layer components {
+  .leaflet-container {
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+  }
+
+  /* Improve marker popup styling */
+  .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .leaflet-popup-content {
+    margin: 12px;
+  }
+
+  /* Better zoom control positioning */
+  .leaflet-control-zoom {
+    margin-left: 10px !important;
+    margin-top: 140px !important;
+  }
+
+  /* Smooth marker animations */
+  .leaflet-marker-icon {
+    transition: transform 0.2s ease;
+  }
+
+  .leaflet-marker-icon:hover {
+    transform: scale(1.1);
+    z-index: 1000 !important;
+  }
+
+  /* Attribution styling */
+  .leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.8) !important;
+    font-size: 10px !important;
+    padding: 2px 5px !important;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 640px) {
+    .leaflet-control-zoom {
+      margin-left: 5px !important;
+      margin-top: 160px !important;
+    }
+  }
+}

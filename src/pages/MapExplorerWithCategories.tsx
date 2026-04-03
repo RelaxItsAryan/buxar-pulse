@@ -1,11 +1,30 @@
 import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Search, X, Navigation, MapPin, Hospital, School, ShoppingBag, Building2, Train, Landmark } from 'lucide-react';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default marker icons in react-leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
+const BUXAR_CENTER: [number, number] = [25.5648, 83.9767];
+const BUXAR_BOUNDS: [[number, number], [number, number]] = [
+  [25.400, 83.800],
+  [25.750, 84.150],
+];
 
 interface SearchResult {
   display_name: string;
   lat: string;
   lon: string;
   type: string;
+  importance: number;
 }
 
 interface MarkerData {
@@ -22,12 +41,6 @@ interface Category {
   color: string;
 }
 
-const BUXAR_CENTER = { lat: 25.5648, lng: 83.9767 };
-const BUXAR_BOUNDS = {
-  sw: { lat: 25.400, lng: 83.800 },
-  ne: { lat: 25.750, lng: 84.150 },
-};
-
 const CATEGORIES: Category[] = [
   { id: 'hospital', name: 'Hospitals', query: 'hospital', icon: <Hospital size={18} />, color: 'bg-red-500' },
   { id: 'school', name: 'Schools', query: 'school', icon: <School size={18} />, color: 'bg-blue-500' },
@@ -37,53 +50,22 @@ const CATEGORIES: Category[] = [
   { id: 'temple', name: 'Temples', query: 'temple', icon: <Landmark size={18} />, color: 'bg-yellow-600' },
 ];
 
-export default function MapExplorer() {
+function FlyToLocation({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, zoom, { duration: 1.5 });
+  }, [center, zoom, map]);
+  return null;
+}
+
+export default function MapExplorerWithCategories() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const [mapCenter, setMapCenter] = useState<[number, number]>(BUXAR_CENTER);
+  const [mapZoom, setMapZoom] = useState(13);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-
-  useEffect(() => {
-    // Load Leaflet dynamically
-    const loadLeaflet = async () => {
-      try {
-        // Load CSS
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(link);
-
-        // Load JS
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.onload = () => {
-          setMapLoaded(true);
-          initializeMap();
-        };
-        document.body.appendChild(script);
-      } catch (error) {
-        console.error('Error loading Leaflet:', error);
-      }
-    };
-
-    loadLeaflet();
-  }, []);
-
-  const initializeMap = () => {
-    const L = (window as any).L;
-    if (!L) return;
-
-    const map = L.map('map').setView([BUXAR_CENTER.lat, BUXAR_CENTER.lng], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
-
-    // Store map instance globally
-    (window as any).leafletMap = map;
-  };
 
   const searchPlaces = async (query: string) => {
     if (!query.trim()) {
@@ -98,7 +80,7 @@ export default function MapExplorer() {
         `format=json&` +
         `q=${encodeURIComponent(query + ', Buxar, Bihar')}` +
         `&bounded=1` +
-        `&viewbox=${BUXAR_BOUNDS.sw.lng},${BUXAR_BOUNDS.sw.lat},${BUXAR_BOUNDS.ne.lng},${BUXAR_BOUNDS.ne.lat}` +
+        `&viewbox=${BUXAR_BOUNDS[0][1]},${BUXAR_BOUNDS[0][0]},${BUXAR_BOUNDS[1][1]},${BUXAR_BOUNDS[1][0]}` +
         `&limit=10`
       );
       const data = await response.json();
@@ -119,72 +101,49 @@ export default function MapExplorer() {
   }, [searchQuery]);
 
   const handleResultClick = (result: SearchResult) => {
-    const L = (window as any).L;
-    const map = (window as any).leafletMap;
-    if (!L || !map) return;
-
     const lat = parseFloat(result.lat);
     const lon = parseFloat(result.lon);
-
-    map.flyTo([lat, lon], 16);
-
-    const marker = L.marker([lat, lon]).addTo(map);
-    marker.bindPopup(`<strong>${result.display_name.split(',')[0]}</strong><br/>${result.type}`).openPopup();
-
+    setMapCenter([lat, lon]);
+    setMapZoom(16);
+    
     const newMarker: MarkerData = {
       position: [lat, lon],
       name: result.display_name,
       type: result.type,
     };
     setMarkers([...markers, newMarker]);
-
+    
     setSearchQuery('');
     setSearchResults([]);
   };
 
   const handleCategoryClick = async (category: Category) => {
     setSelectedCategory(category.id);
+    setSearchQuery(category.query);
+    
+    // Auto-search for category
     setIsSearching(true);
-
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?` +
         `format=json&` +
         `q=${encodeURIComponent(category.query + ', Buxar, Bihar')}` +
         `&bounded=1` +
-        `&viewbox=${BUXAR_BOUNDS.sw.lng},${BUXAR_BOUNDS.sw.lat},${BUXAR_BOUNDS.ne.lng},${BUXAR_BOUNDS.ne.lat}` +
+        `&viewbox=${BUXAR_BOUNDS[0][1]},${BUXAR_BOUNDS[0][0]},${BUXAR_BOUNDS[1][1]},${BUXAR_BOUNDS[1][0]}` +
         `&limit=20`
       );
       const data = await response.json();
-
-      const L = (window as any).L;
-      const map = (window as any).leafletMap;
-      if (!L || !map) return;
-
-      // Clear existing markers
-      map.eachLayer((layer: any) => {
-        if (layer instanceof L.Marker) {
-          map.removeLayer(layer);
-        }
-      });
-
-      // Add new markers
-      const newMarkers: MarkerData[] = [];
-      data.forEach((result: SearchResult) => {
-        const lat = parseFloat(result.lat);
-        const lon = parseFloat(result.lon);
-        const marker = L.marker([lat, lon]).addTo(map);
-        marker.bindPopup(`<strong>${result.display_name.split(',')[0]}</strong><br/>${category.name}`);
-        
-        newMarkers.push({
-          position: [lat, lon],
-          name: result.display_name.split(',')[0],
-          type: category.name,
-        });
-      });
-
+      
+      // Add all results as markers
+      const newMarkers: MarkerData[] = data.map((result: SearchResult) => ({
+        position: [parseFloat(result.lat), parseFloat(result.lon)] as [number, number],
+        name: result.display_name.split(',')[0],
+        type: category.name,
+      }));
+      
       setMarkers(newMarkers);
-      map.setView([BUXAR_CENTER.lat, BUXAR_CENTER.lng], 13);
+      setMapCenter(BUXAR_CENTER);
+      setMapZoom(13);
     } catch (error) {
       console.error('Category search error:', error);
     } finally {
@@ -197,21 +156,18 @@ export default function MapExplorer() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          const L = (window as any).L;
-          const map = (window as any).leafletMap;
-          if (!L || !map) return;
-
-          map.flyTo([latitude, longitude], 15);
-          const marker = L.marker([latitude, longitude]).addTo(map);
-          marker.bindPopup('<strong>Your Location</strong>').openPopup();
-
-          setMarkers([{
+          setMapCenter([latitude, longitude]);
+          setMapZoom(15);
+          
+          const newMarker: MarkerData = {
             position: [latitude, longitude],
             name: 'Your Location',
             type: 'current_location',
-          }]);
+          };
+          setMarkers([newMarker]);
         },
         (error) => {
+          console.error('Error getting location:', error);
           alert('Unable to get your location.');
         }
       );
@@ -219,16 +175,6 @@ export default function MapExplorer() {
   };
 
   const clearMarkers = () => {
-    const L = (window as any).L;
-    const map = (window as any).leafletMap;
-    if (!L || !map) return;
-
-    map.eachLayer((layer: any) => {
-      if (layer instanceof L.Marker) {
-        map.removeLayer(layer);
-      }
-    });
-
     setMarkers([]);
     setSelectedCategory(null);
   };
@@ -245,7 +191,7 @@ export default function MapExplorer() {
               placeholder="Search places in Buxar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 outline-none text-sm text-gray-900"
+              className="flex-1 outline-none text-sm"
             />
             {searchQuery && (
               <button onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-gray-600">
@@ -324,22 +270,40 @@ export default function MapExplorer() {
 
       {/* Marker Counter */}
       {markers.length > 0 && (
-        <div className="absolute bottom-24 left-4 z-[1000] bg-white px-4 py-2 rounded-full shadow-lg text-sm font-medium text-gray-900">
+        <div className="absolute bottom-24 left-4 z-[1000] bg-white px-4 py-2 rounded-full shadow-lg text-sm font-medium">
           {markers.length} {markers.length === 1 ? 'location' : 'locations'}
         </div>
       )}
 
-      {/* Map Container */}
-      <div id="map" className="w-full h-full" />
+      {/* Map */}
+      <MapContainer
+        center={BUXAR_CENTER}
+        zoom={13}
+        className="w-full h-full"
+        zoomControl={true}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        
+        <FlyToLocation center={mapCenter} zoom={mapZoom} />
 
-      {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading map...</p>
-          </div>
-        </div>
-      )}
+        {markers.map((marker, index) => (
+          <Marker key={index} position={marker.position}>
+            <Popup>
+              <div className="text-sm">
+                <p className="font-semibold">{marker.name}</p>
+                <p className="text-gray-600 text-xs capitalize">{marker.type}</p>
+                <p className="text-gray-500 text-xs mt-1">
+                  {marker.position[0].toFixed(6)}, {marker.position[1].toFixed(6)}
+                </p>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
     </div>
   );
 }
