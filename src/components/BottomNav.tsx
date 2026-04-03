@@ -20,7 +20,7 @@ export default function BottomNav() {
       initial={{ y: 80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.8 }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 glass-pill px-3 py-2"
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 transparent backdrop-blur-lg rounded-full shadow-lg px-6 py-3 flex items-center justify-center gap-8"
       style={{ border: '1px solid rgba(255,255,255,0.1)' }}
     >
       <div className="flex items-center gap-1 relative">
