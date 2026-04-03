@@ -43,11 +43,21 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <TopNav />
-        <AnimatedRoutes />
+        <RouteWrapper />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
+
+function RouteWrapper() {
+  const location = useLocation();
+  const showNav = location.pathname === "/";
+  return (
+    <>
+      {showNav && <TopNav />}
+      <AnimatedRoutes />
+    </>
+  );
+}
 
 export default App;
