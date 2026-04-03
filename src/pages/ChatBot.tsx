@@ -3,7 +3,6 @@ import { Send, Sparkles, X, Trash2, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
-import BottomNav from '@/components/BottomNav';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
@@ -199,8 +198,6 @@ export default function ChatBot() {
           </button>
         </div>
       </div>
-
-      <BottomNav />
     </div>
   );
 }
