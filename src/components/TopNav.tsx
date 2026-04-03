@@ -27,12 +27,12 @@ export default function TopNav() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.2 }}
-      className="fixed top-0 left-0 right-0 z-50 glass-pill mx-4 my-3"
-      style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+      className="fixed top-0 left-0 right-0 z-50 glass-pill mx-3 my-2"
+      style={{ border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(6px)' }}
     >
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-3 py-2">
         {/* Logo */}
-        <div className="text-white font-bold text-lg">
+        <div className="text-white font-bold text-base">
           <span className="gradient-text">Buxar</span>
         </div>
 
@@ -60,12 +60,12 @@ export default function TopNav() {
                   />
                 )}
                 <Icon
-                  size={20}
+                  size={18}
                   className="relative z-10"
                   style={{ color: isActive ? '#4F46E5' : '#6B7280' }}
                 />
                 <span
-                  className="relative z-10 text-[10px] font-medium mt-0.5"
+                  className="relative z-10 text-[9px] font-medium mt-0.5"
                   style={{ color: isActive ? '#4F46E5' : '#6B7280' }}
                 >
                   {tab.label}
@@ -78,9 +78,9 @@ export default function TopNav() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden p-2 text-foreground hover:text-primary transition-colors"
+          className="md:hidden p-1 text-foreground hover:text-primary transition-colors"
         >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
+          {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
@@ -103,13 +103,13 @@ export default function TopNav() {
                   <button
                     key={tab.id}
                     onClick={() => handleNavigate(tab.path)}
-                    className="flex items-center gap-3 px-4 py-3 transition-colors"
+                    className="flex items-center gap-3 px-3 py-2 transition-colors"
                     style={{
                       color: isActive ? '#4F46E5' : '#6B7280',
                       background: isActive ? 'rgba(79,70,229,0.1)' : 'transparent',
                     }}
                   >
-                    <Icon size={20} />
+                    <Icon size={18} />
                     <span className="font-medium">{tab.label}</span>
                   </button>
                 );
