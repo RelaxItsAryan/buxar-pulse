@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Paperclip, Sparkles, MapPin, Star, Settings, User, Crown, UtensilsCrossed, Stethoscope, GraduationCap, Hotel } from 'lucide-react';
+import { Search, Paperclip, Sparkles, MapPin, Star, Settings, User, Crown, UtensilsCrossed, Stethoscope, GraduationCap, Hotel, Bot } from 'lucide-react';
 import ParticleCanvas from './ParticleCanvas';
 import StatsBanner from './StatsBanner';
 
@@ -152,7 +152,7 @@ export default function HeroSection() {
         animate={{ scale: 1 }}
         transition={{ delay: 1.2, type: 'spring', damping: 15 }}
         onClick={() => navigate('/chat')}
-        className="fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer"
+        className="fixed bottom-8 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer"
         style={{
           background: 'linear-gradient(135deg, #4F46E5, #A78BFA)',
           boxShadow: '0 0 30px rgba(79,70,229,0.5), 0 8px 24px rgba(0,0,0,0.4)',
@@ -160,12 +160,12 @@ export default function HeroSection() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
-        <Sparkles size={22} className="text-foreground" />
+        <Bot size={22} className="text-foreground" />
       </motion.button>
 
       {/* Footer */}
       <footer
-        className="relative z-10 mx-auto flex items-center justify-between px-6 py-4 text-xs text-muted-foreground"
+        className="relative z-12 mx-auto flex items-center justify-between px-6 py-1 text-xs text-muted-foreground"
         style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
       >
         <span>© 2025 MyBuxar. All rights reserved.</span>
