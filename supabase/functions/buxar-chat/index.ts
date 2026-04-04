@@ -5,6 +5,63 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const PEXELS_API_KEY = "1Bk2DBCOW6yg2h7x6oPjvFn8upZnDoYoYfFvoMqso7ycHZlc7hMfFCfm";
+
+async function searchPexelsImages(query: string, count: number = 3): Promise<Array<{url: string, alt: string, photographer: string}>> {
+  try {
+    const response = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape`,
+      { headers: { Authorization: PEXELS_API_KEY } }
+    );
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.photos?.map((p: any) => ({
+      url: p.src.medium,
+      alt: p.alt || query,
+      photographer: p.photographer
+    })) || [];
+  } catch {
+    return [];
+  }
+}
+
+function extractImageKeywords(text: string): string[] {
+  const keywords: string[] = [];
+  const patterns = [
+    /ganges|ganga|river/i,
+    /temple|mandir|shrine/i,
+    /fort|fortress|castle/i,
+    /ghat|riverbank/i,
+    /battle|war|historic/i,
+    /ashram|hermitage|spiritual/i,
+    /bihar|india|indian/i,
+    /sunrise|sunset|morning|evening/i,
+    /food|cuisine|restaurant/i,
+    /hotel|accommodation|stay/i
+  ];
+  
+  const keywordMap: Record<string, string> = {
+    'ganges|ganga|river': 'ganges river india',
+    'temple|mandir|shrine': 'hindu temple india',
+    'fort|fortress|castle': 'ancient fort india',
+    'ghat|riverbank': 'ghat ganges india',
+    'battle|war|historic': 'historic india monument',
+    'ashram|hermitage|spiritual': 'spiritual ashram india',
+    'bihar|india|indian': 'bihar india landscape',
+    'sunrise|sunset|morning|evening': 'ganges sunrise india',
+    'food|cuisine|restaurant': 'indian cuisine food',
+    'hotel|accommodation|stay': 'india hotel heritage'
+  };
+
+  for (const [pattern, keyword] of Object.entries(keywordMap)) {
+    if (new RegExp(pattern, 'i').test(text)) {
+      keywords.push(keyword);
+    }
+  }
+  
+  return keywords.length > 0 ? keywords : ['buxar india heritage'];
+}
+
 const SYSTEM_PROMPT = `You are "Buxar AI Guide" — a premium, knowledgeable AI assistant for the city of Buxar, Bihar, India. You are an expert on:
 
 **History:**
@@ -30,7 +87,15 @@ const SYSTEM_PROMPT = `You are "Buxar AI Guide" — a premium, knowledgeable AI 
 - Hotels and accommodation
 - Transport and connectivity
 
-Respond in a friendly, engaging, knowledgeable tone. Use markdown formatting. When users ask about generating images, let them know you can help describe scenes but image generation is not currently available. Keep responses concise but informative.`;
+**IMPORTANT FORMATTING RULES:**
+- When discussing places, attractions, or itineraries, structure your response with clear sections
+- Use markdown headers (##) for main sections
+- Use bullet points for lists
+- When creating itineraries, include: Day/Time, Place Name, Description, and Activities
+- At the END of your response, add a line: [IMAGES: keyword1, keyword2] where keywords are relevant search terms for photos (e.g., [IMAGES: ganges river, hindu temple, india fort])
+- Keep responses informative and engaging
+
+Respond in a friendly, engaging, knowledgeable tone. Use markdown formatting.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });

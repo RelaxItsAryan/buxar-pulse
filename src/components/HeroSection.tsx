@@ -37,10 +37,10 @@ export default function HeroSection() {
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.99 }}
         >
-          <source src="/Buxar.mp4" type="video/mp4" />
+          <source src="/Buxar1.mp4" type="video/mp4" />
         </video>
         {/* Dark Overlay for Readability */}
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/5" />
       </div>
 
 

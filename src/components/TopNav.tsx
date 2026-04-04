@@ -33,7 +33,7 @@ export default function TopNav() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.2 }}
       className="fixed top-0 left-0 right-0 z-50 glass-pill mx-3 my-2"
-      style={{ border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(6px)' }}
+      style={{ border: '1px solid rgba(255, 255, 255, 0.91)', backdropFilter: 'blur(6px)' }}
     >
       <div className="flex items-center justify-between px-3 py-2">
         {/* Logo */}
@@ -58,8 +58,8 @@ export default function TopNav() {
                     layoutId="activeTab"
                     className="absolute inset-0 rounded-full"
                     style={{
-                      background: 'rgba(79,70,229,0.2)',
-                      border: '1px solid rgba(79,70,229,0.3)',
+                      background: 'rgba(90, 15, 238, 0.89)',
+                      border: '1px solid rgba(230, 159, 159, 0.3)',
                     }}
                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                   />
@@ -67,11 +67,11 @@ export default function TopNav() {
                 <Icon
                   size={18}
                   className="relative z-10"
-                  style={{ color: isActive ? '#4F46E5' : '#6B7280' }}
+                  style={{ color: isActive ? '#ffffff' : '#ffffff' }}
                 />
                 <span
                   className="relative z-10 text-[9px] font-medium mt-0.5"
-                  style={{ color: isActive ? '#4F46E5' : '#6B7280' }}
+                  style={{ color: isActive ? '#ffffff' : '#ffffff' }}
                 >
                   {tab.label}
                 </span>
